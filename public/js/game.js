@@ -100,8 +100,7 @@ function updateScoreCard(moveCounts) {
     
     // Update total moves and calculate current score
     const totalMoves = Object.values(moveCounts).reduce((a, b) => a + b, 0);
-    const maxPossibleMoves = 100 * 4; // Adjust based on your game's maximum
-    const currentScore = Math.round((1 - totalMoves / maxPossibleMoves) * 1000);
+    let currentScore = Math.max(0, 1000 - totalMoves * 10);
     
     // Update team score
     document.getElementById('current-score').textContent = Math.max(currentScore, 0);
@@ -124,7 +123,7 @@ function showOptimalPath() {
         
         // Update solution stats
         const solution = currentGameState.bestSolution;
-        document.getElementById("optimal-total-distance").textContent = solution.totalDistance;
+        document.getElementById("optimal-total-distance").textContent = solution.totalDistance*10;
         
         solution.paths.forEach(path => {
             document.getElementById(`optimal-p${path.playerId}-moves`).textContent = path.distance;
@@ -182,7 +181,7 @@ function showVictoryCard(data) {
     showingOptimalPath = false;
     
     // Update final stats
-    document.getElementById("final-score").textContent = data.score;
+    document.getElementById("final-score").textContent = Object.values(data.gameState.moveCounts).reduce((a, b) => a + b, 0)*10;
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`final-p${i}-moves`).textContent = 
             data.gameState.moveCounts[i];
