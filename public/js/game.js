@@ -41,7 +41,7 @@ function move(playerId, direction) {
     })
         .then((res) => res.json())
         .then((data) => {
-            currentGameState = data.gameState;  // Store the game state
+            currentGameState = data.gameState; 
             renderGrid(data.gameState);
             updateScoreCard(data.gameState.moveCounts);
             

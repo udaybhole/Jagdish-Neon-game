@@ -7,6 +7,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Multiplayer Maze Game</title>
     <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_06HWFGMmJkfk-3WTVd_PaCRcKidQqgkoOg&s">
+
+
+    <script>
+        const activeKeys = new Set();
+        const keyBindings = {
+            '8': { player: 1, direction: 'up' },
+            '2': { player: 1, direction: 'down' },
+            '4': { player: 1, direction: 'left' },
+            '6': { player: 1, direction: 'right' },
+            '7': { player: 1, direction: 'upLeft' },
+            '9': { player: 1, direction: 'upRight' },
+            '1': { player: 1, direction: 'downLeft' },
+            '3': { player: 1, direction: 'downRight' },
+
+
+            'w': { player: 2, direction: 'up' },
+            's': { player: 2, direction: 'down' },
+            'a': { player: 2, direction: 'left' },
+            'd': { player: 2, direction: 'right' },
+            'q':{player:2, direction:'upLeft'},
+            'e':{player:2, direction:'upRight'},
+            'z':{player:2, direction:'downLeft'},
+            'c':{player:2, direction:'downRight'},
+            
+
+            'y': { player: 3, direction: 'up' },
+            'h': { player: 3, direction: 'down' },
+            'g': { player: 3, direction: 'left' },
+            'j': { player: 3, direction: 'right' },
+            't':{player:3, direction:'upLeft'},
+            'u':{player:3, direction:'upRight'},
+            'b':{player:3, direction:'downLeft'},
+            'm':{player:3, direction:'downRight'},
+            
+        };
+    
+        document.addEventListener('keydown', (event) => {
+            activeKeys.add(event.key.toLowerCase()); 
+
+            const action = keyBindings[event.key];
+            if (action) {
+                move(action.player, action.direction);
+            }
+        });
+    </script>
+
+
 </head>
 <body>
     <h2>Neon Maze Challenge</h2>
