@@ -61,14 +61,12 @@ function findOptimalPaths(grid) {
         return { distances, paths };
     };
 
-    // Calculate paths from all corners
     const cornerResults = corners.map((corner, index) => ({
         ...corner,
         playerId: index + 1,
         ...findPathsFromCorner(corner.coords)
     }));
 
-    // Find the best meeting point
     let bestMeetingPoint = null;
     let minMoves = Infinity;
     let minRange = Infinity;
@@ -76,7 +74,7 @@ function findOptimalPaths(grid) {
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-            if (grid[r][c] === 1) continue; // Skip obstacles
+            if (grid[r][c] === 1) continue; 
 
             const cornerData = cornerResults.map(result => ({
                 playerId: result.playerId,
@@ -84,7 +82,6 @@ function findOptimalPaths(grid) {
                 path: result.paths[r][c]
             }));
 
-            // Skip if any path is impossible
             if (cornerData.some(cd => cd.distance === Infinity)) continue;
 
             const distances = cornerData.map(cd => cd.distance);
