@@ -41,7 +41,7 @@ function move(playerId, direction) {
     })
         .then((res) => res.json())
         .then((data) => {
-            currentGameState = data.gameState; 
+            currentGameState = data.gameState;  // Store the game state
             renderGrid(data.gameState);
             updateScoreCard(data.gameState.moveCounts);
             
@@ -92,17 +92,15 @@ function renderGrid(gameState) {
 }
 
 function updateScoreCard(moveCounts) {
-    // Update individual player moves
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`p${i}-moves`).textContent = moveCounts[i];
         document.getElementById(`counter-${i}`).textContent = `Moves: ${moveCounts[i]}`;
     }
     
-    // Update total moves and calculate current score
+
     const totalMoves = Object.values(moveCounts).reduce((a, b) => a + b, 0);
-    let currentScore = Math.max(0, 1000 - totalMoves * 10);
-    
-    // Update team score
+    let currentScore = Math.max(0, 1000 - totalMoves * 10);    
+
     document.getElementById('current-score').textContent = Math.max(currentScore, 0);
 }
 
@@ -123,37 +121,59 @@ function showOptimalPath() {
         
         // Update solution stats
         const solution = currentGameState.bestSolution;
-        document.getElementById("optimal-total-distance").textContent = solution.totalDistance*10;
         
+        // Calculate actual moves statistics
+        const actualMoves = Object.values(currentGameState.moveCounts);
+        const actualTotalMoves = actualMoves.reduce((a, b) => a + b, 0);
+        const actualMaxMoves = Math.max(...actualMoves);
+        const actualMinMoves = Math.min(...actualMoves);
+        const actualMoveDiff = actualMaxMoves - actualMinMoves;
+
+        // Calculate optimal moves statistics
+        const optimalMoves = solution.paths.map(p => p.distance);
+        const optimalTotalMoves = optimalMoves.reduce((a, b) => a + b, 0);
+        const optimalMaxMoves = Math.max(...optimalMoves);
+        const optimalMinMoves = Math.min(...optimalMoves);
+        const optimalMoveDiff = optimalMaxMoves - optimalMinMoves;
+
+        // Update display
+        document.getElementById("optimal-total-distance").textContent = optimalTotalMoves*10 || 0;
+        
+        // Update individual player optimal moves
         solution.paths.forEach(path => {
-            document.getElementById(`optimal-p${path.playerId}-moves`).textContent = path.distance;
+            document.getElementById(`optimal-p${path.playerId}-moves`).textContent = 
+                path.distance || 0;
         });
 
-        const actualTotalMoves = Object.values(currentGameState.moveCounts).reduce((a, b) => a + b, 0);
-        const optimalTotalMoves = solution.totalDistance;
-        const efficiency = Math.round((optimalTotalMoves / actualTotalMoves) * 100);
+        // Calculate and display move efficiency (how close total moves are to optimal)
+        const moveEfficiency = optimalTotalMoves > 0 ? 
+            Math.round((optimalTotalMoves / actualTotalMoves) * 100) : 0;
 
-        document.getElementById("actual-total-moves").textContent = actualTotalMoves;
-        document.getElementById("optimal-total-moves").textContent = optimalTotalMoves;
-        document.getElementById("path-efficiency").textContent = efficiency;
+        // Calculate and display meeting point efficiency (how balanced the paths are)
+        const meetPointEfficiency = actualMoveDiff > 0 ? 
+            Math.round((optimalMoveDiff / actualMoveDiff) * 100) : 100;
         
-        grid.innerHTML = "";
+        document.getElementById("actual-total-moves").textContent = actualTotalMoves;
+        document.getElementById("optimal-total-moves").textContent = optimalTotalMoves || 0;
+        document.getElementById("move-efficiency").textContent = `${moveEfficiency}%`;
+        document.getElementById("meet-point-efficiency").textContent = `${meetPointEfficiency}%`;
         
         // Render optimal paths
+        grid.innerHTML = "";
         currentGameState.maze.forEach((row, y) => {
             row.forEach((cell, x) => {
                 const div = document.createElement("div");
                 div.className = `cell ${cell}`;
                 
-                if (currentGameState.bestSolution.paths) {
-                    currentGameState.bestSolution.paths.forEach(pathData => {
-                        if (pathData.path && pathData.path.some(([py, px]) => py === y && px === x)) {
+                if (solution.paths) {
+                    solution.paths.forEach(pathData => {
+                        if (pathData.path && pathData.path.some(pos => pos[0] === y && pos[1] === x)) {
                             div.classList.add(`optimal-path${pathData.playerId}`);
                         }
                     });
                 }
                 
-                const [meetY, meetX] = currentGameState.bestSolution.meetingPoint;
+                const [meetY, meetX] = solution.meetingPoint;
                 if (y === meetY && x === meetX) {
                     div.classList.add('meeting-point');
                 }
@@ -181,7 +201,7 @@ function showVictoryCard(data) {
     showingOptimalPath = false;
     
     // Update final stats
-    document.getElementById("final-score").textContent = Object.values(data.gameState.moveCounts).reduce((a, b) => a + b, 0)*10;
+    document.getElementById("final-score").textContent =  Object.values(data.gameState.moveCounts).reduce((a, b) => a + b, 0)*10;
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`final-p${i}-moves`).textContent = 
             data.gameState.moveCounts[i];

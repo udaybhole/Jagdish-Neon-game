@@ -1,5 +1,6 @@
 /**
- * Finds the optimal paths and distances for all points in the grid from all 4 corners.
+ * Finds the optimal paths and distances for all points in the grid from all 4 corners,
+ * prioritizing minimum moves and then minimizing the range between longest and shortest distances.
  * @param {number[][]} grid - 10x10 maze grid (0: empty, 1: obstacle).
  * @returns {object} - Object containing optimal paths and meeting points.
  */
@@ -8,14 +9,14 @@ function findOptimalPaths(grid) {
     const cols = 10;
 
     const directions = [
-        [1, 0],  // Down
-        [-1, 0], // Up
-        [0, 1],  // Right
+        [1, 0],   // Down
+        [-1, 0],  // Up
+        [0, 1],   // Right
         [0, -1],  // Left
-        [1,1],
-        [-1,-1],
-        [1,-1],
-        [-1,1]
+        [1, 1],   // Down-Right
+        [1, -1],  // Down-Left
+        [-1, 1],  // Up-Right
+        [-1, -1]  // Up-Left
     ];
 
     const corners = [
@@ -26,7 +27,7 @@ function findOptimalPaths(grid) {
     ];
 
     const findPathsFromCorner = (start) => {
-        const queue = [[...start, 0]];
+        const queue = [[...start, 0]]; // [row, col, distance]
         const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
         const distances = Array.from({ length: rows }, () => Array(cols).fill(Infinity));
         const paths = Array.from({ length: rows }, () => Array(cols).fill(null));
@@ -69,6 +70,7 @@ function findOptimalPaths(grid) {
 
     // Find the best meeting point
     let bestMeetingPoint = null;
+    let minMoves = Infinity;
     let minRange = Infinity;
     let bestPaths = null;
 
@@ -89,12 +91,14 @@ function findOptimalPaths(grid) {
             const minDist = Math.min(...distances);
             const maxDist = Math.max(...distances);
             const range = maxDist - minDist;
-            const totalDistance = distances.reduce((sum, d) => sum + d, 0);
+
+            const totalMoves = distances.reduce((sum, d) => sum + d, 0);
 
             if (
-                range < minRange || 
-                (range === minRange && totalDistance < (bestMeetingPoint?.totalDistance || Infinity))
+                totalMoves < minMoves || 
+                (totalMoves === minMoves && range < minRange)
             ) {
+                minMoves = totalMoves;
                 minRange = range;
                 bestMeetingPoint = [r, c];
                 bestPaths = cornerData;
@@ -105,8 +109,10 @@ function findOptimalPaths(grid) {
     return {
         meetingPoint: bestMeetingPoint,
         paths: bestPaths,
-        totalDistance: bestPaths.reduce((sum, p) => sum + p.distance, 0)
+        totalMoves: minMoves,
+        totalRange: minRange
     };
 }
+
 
 module.exports = findOptimalPaths;
