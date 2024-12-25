@@ -38,7 +38,7 @@ class Game {
 
     generateObstacles() {
         let placed = 0;
-        const maxObstacles = Math.floor(this.size * this.size * 0.20);
+        const maxObstacles = Math.floor(this.size * this.size * 0.30);
         while (placed < maxObstacles) {
             const x = Math.floor(Math.random() * this.size);
             const y = Math.floor(Math.random() * this.size);
