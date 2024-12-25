@@ -13,7 +13,6 @@ app.use("/", gameRoutes);
 app.post('/move', (req, res) => {
     const { playerId, direction } = req.body;
 
-    // Validate input
     if (!playerId || !['up', 'down', 'left', 'right'].includes(direction)) {
         return res.status(400).json({ error: 'Invalid move request.' });
     }
